@@ -43,7 +43,6 @@ The empirical study includes synthetic experiments, standard benchmark datasets,
 │   └── README.md
 └── results/
     ├── figures/
-    └── tables/
 ```
 
 The notebooks are organized as follows:
