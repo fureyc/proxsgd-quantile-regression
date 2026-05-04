@@ -4,5 +4,7 @@ message: "If you use this code, please cite the associated paper."
 authors:
   - family-names: Furey
     given-names: Colin
+  - family-names: Pourkamali Anaraki
+    given-names: Farhad
 date-released: 2026-05-04
 version: 1.0.0
