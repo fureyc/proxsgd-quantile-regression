@@ -1,0 +1,12 @@
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.DS_Store
+
+data/raw/
+data/processed/
+results/cache/
+*.h5
+*.pkl
+*.joblib
+*.npz
