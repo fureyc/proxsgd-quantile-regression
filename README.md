@@ -27,6 +27,8 @@ The experiments evaluate:
 - behavior under optional `l1` regularization.
 
 ## Repository structure
+
+``` text
 .
 ├── README.md
 ├── requirements.txt
