@@ -45,7 +45,7 @@ def main():
         batch_size=256,
         use_adagrad=True,
         use_averaging=True,
-        random_state=42,
+        random_state=33,
     )
 
     # Fit upper quantile model
@@ -56,7 +56,7 @@ def main():
         batch_size=256,
         use_adagrad=True,
         use_averaging=True,
-        random_state=42,
+        random_state=33,
     )
 
     lower_model.fit(X_train, y_train)
