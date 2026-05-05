@@ -230,6 +230,37 @@ results/figures/
 results/tables/
 ```
 
+## Estimator API
+
+`SGDQuantileRegressor` follows the standard `scikit-learn` estimator interface.
+
+Main methods:
+
+- `fit(X, y)`: fit a linear quantile regression model.
+- `predict(X)`: return fitted conditional quantile predictions.
+- `pinball_loss(X, y_true)`: compute the mean pinball loss of a fitted model.
+
+Common initialization parameters include:
+
+- `quantile`: target quantile level in `(0, 1)`.
+- `max_iter`: maximum number of proximal stochastic gradient iterations.
+- `base_lr`: base learning rate used in the step-size schedule.
+- `batch_size`: mini-batch size for stochastic updates.
+- `l1`: optional L1 regularization strength.
+- `l2`: optional L2 regularization strength.
+- `use_adagrad`: whether to use AdaGrad adaptive step sizes.
+- `use_averaging`: whether to use Polyak--Ruppert iterate averaging.
+- `eval_every`: frequency at which training diagnostics are recorded.
+- `early_stopping`: whether to use validation-based early stopping.
+- `random_state`: random seed for reproducibility.
+
+After fitting, the learned parameters are available as:
+
+- `coef_`: fitted coefficient vector.
+- `intercept_`: fitted intercept.
+- `n_iter_`: number of stochastic iterations performed.
+- `history_`: dictionary containing recorded optimization diagnostics.
+
 ## Examples
 
 Small standalone examples are provided in the `examples/` directory.
