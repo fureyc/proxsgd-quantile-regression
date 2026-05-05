@@ -150,11 +150,11 @@ X_test = scaler.transform(X_test)
 # Fit an upper conditional quantile model
 model = SGDQuantileRegressor(
     quantile=0.9,
-    learning_rate=0.5,
+    base_lr=0.5,
     max_iter=5000,
     batch_size=256,
     use_adagrad=True,
-    average_iterates=True,
+    use_averaging=True,
     random_state=42,
 )
 
@@ -170,21 +170,21 @@ Prediction intervals can be constructed by fitting separate models at lower and 
 ```python
 lower = SGDQuantileRegressor(
     quantile=0.1,
-    learning_rate=0.5,
+    base_lr=0.5,
     max_iter=5000,
     batch_size=256,
     use_adagrad=True,
-    average_iterates=True,
+    use_averaging=True,
     random_state=42,
 )
 
 upper = SGDQuantileRegressor(
     quantile=0.9,
-    learning_rate=0.5,
+    base_lr=0.5,
     max_iter=5000,
     batch_size=256,
     use_adagrad=True,
-    average_iterates=True,
+    use_averaging=True,
     random_state=42,
 )
 
