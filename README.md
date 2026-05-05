@@ -221,9 +221,17 @@ Then open the notebooks in the order listed above.
 
 For Google Colab, upload or open the notebooks in the same order. If running in Colab, make sure that any required local data paths are updated before running the CPS experiments.
 
-## Data
+## Data notes
 
-The repository uses a combination of synthetic data, publicly available benchmark datasets, and CPS data.
+The synthetic and benchmark experiments can be run directly from the notebooks. Public benchmark datasets are either loaded through standard Python packages or downloaded from their public sources as needed.
+
+The large-scale CPS experiments require an IPUMS CPS extract. Due to data-use restrictions and file size, the CPS data are not included in this repository. To reproduce the CPS experiments, obtain the corresponding IPUMS CPS extract, clean it using the preprocessing steps described in the notebook, and place the cleaned chunks in:
+
+```text
+data/ipums_clean_chunks/
+```
+
+The CSV files in `results/tables/` are included so that the manuscript tables and figures can be regenerated without rerunning every large-scale experiment from scratch.
 
 ### Synthetic data
 
