@@ -67,7 +67,6 @@ The notebooks are organized as follows:
 - `02_SGD_Quantile_Results.ipynb` runs the experiments and produces the numerical results, tables, and figures reported in the manuscript.
 
 The `results/` directory is intended to store generated figures and tables. It may be empty when the repository is first cloned; running the results notebook will populate the relevant output folders.
-
 ## Installation
 
 Clone the repository:
@@ -76,22 +75,60 @@ Clone the repository:
 git clone https://github.com/fureyc/proxsgd-quantile-regression.git
 cd proxsgd-quantile-regression
 ```
+
+Create and activate a virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+On Windows, activate the environment with:
+
+```bash
+.venv\Scripts\activate
+```
+
+Install the package locally in editable mode:
+
+```bash
+pip install -e .
+```
+
+This makes the estimator available as a standard Python import:
+
+```python
+from proxsgd_quantile import SGDQuantileRegressor
+```
+
+To install the additional dependencies needed to run the notebooks and reproduce the experiments, use:
+
+```bash
+pip install -r requirements.txt
+```
+
+For closer reproduction of the submitted manuscript results, use the pinned environment file:
+
+```bash
+pip install -r requirements-repro.txt
+pip install -e .
+```
+
+The submitted experiments were run with Python 3.12.13, NumPy 2.0.2, pandas 2.2.2, SciPy 1.16.3, scikit-learn 1.6.1, and statsmodels 0.14.6.
+
+## Quick start: using `SGDQuantileRegressor`
+
 The main estimator in this repository is `SGDQuantileRegressor`, a `scikit-learn`-compatible linear quantile regression estimator trained using proximal stochastic subgradient descent.
 
-After cloning the repository, install the package locally in editable mode:
+The estimator follows the usual `scikit-learn` `fit`/`predict` interface. The example below fits a linear quantile regression model at the 0.9 quantile.
 
-from proxsgd_quantile import SGDQuantileRegressor
-
-Then the estimator can be imported like a standard Python package:
-
+```python
 from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_pinball_loss
 
 from proxsgd_quantile import SGDQuantileRegressor
-
-The estimator follows the usual `scikit-learn` `fit`/`predict` interface. The example below fits a linear quantile regression model at the 0.9 quantile.
 
 # Load example regression data
 X, y = fetch_california_housing(return_X_y=True)
@@ -125,9 +162,11 @@ y_pred = model.predict(X_test)
 
 loss = mean_pinball_loss(y_test, y_pred, alpha=0.9)
 print(f"Test pinball loss: {loss:.4f}")
+```
 
 Prediction intervals can be constructed by fitting separate models at lower and upper quantile levels.
 
+```python
 lower = SGDQuantileRegressor(
     quantile=0.1,
     learning_rate=0.5,
@@ -159,39 +198,9 @@ mean_width = (q_upper - q_lower).mean()
 
 print(f"Coverage: {coverage:.3f}")
 print(f"Mean interval width: {mean_width:.3f}")
+```
 
 The resulting interval `[q_lower, q_upper]` is a nominal 80% prediction interval because it is constructed from the 0.1 and 0.9 conditional quantile estimates.
-
-Create and activate a virtual environment:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-On Windows, use:
-
-```bash
-.venv\Scripts\activate
-```
-
-Install the required packages:
-
-```bash
-pip install -r requirements.txt
-```
-
-The main dependencies are:
-
-- `numpy`
-- `pandas`
-- `scipy`
-- `scikit-learn`
-- `statsmodels`
-- `matplotlib`
-- `seaborn`
-- `jupyter`
-- `openpyxl`
 
 ## Reproducing the experiments
 
