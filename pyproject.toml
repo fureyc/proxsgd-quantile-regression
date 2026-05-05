@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proxsgd-quantile"
+version = "0.1.0"
+description = "Proximal stochastic gradient estimator for linear quantile regression."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.0",
+    "scikit-learn>=1.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
