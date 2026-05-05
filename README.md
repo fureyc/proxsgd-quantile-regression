@@ -28,21 +28,38 @@ The experiments evaluate:
 
 The empirical study includes synthetic experiments, standard benchmark datasets, and large-scale experiments using data derived from the Current Population Survey (CPS).
 
+And here is an updated repository structure block reflecting the changes:
+
+```markdown
 ## Repository structure
 
 ```text
 .
 ├── README.md
 ├── requirements.txt
+├── pyproject.toml
 ├── LICENSE
 ├── CITATION.cff
+├── src/
+│   └── proxsgd_quantile/
+│       ├── __init__.py
+│       └── sgd_quantile.py
 ├── notebooks/
 │   ├── 01_SGD_Quantile_Regression_Utils.ipynb
 │   └── 02_SGD_Quantile_Results.ipynb
 ├── data/
+│   └── README.md
 └── results/
+    ├── README.md
     ├── figures/
-```
+    └── tables/
+
+## Quick start: using `SGDQuantileRegressor`
+
+After cloning the repository, install the package locally in editable mode:
+
+```bash
+pip install -e .
 
 The notebooks are organized as follows:
 
@@ -59,6 +76,91 @@ Clone the repository:
 git clone https://github.com/fureyc/proxsgd-quantile-regression.git
 cd proxsgd-quantile-regression
 ```
+The main estimator in this repository is `SGDQuantileRegressor`, a `scikit-learn`-compatible linear quantile regression estimator trained using proximal stochastic subgradient descent.
+
+After cloning the repository, install the package locally in editable mode:
+
+from proxsgd_quantile import SGDQuantileRegressor
+
+Then the estimator can be imported like a standard Python package:
+
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_pinball_loss
+
+from proxsgd_quantile import SGDQuantileRegressor
+
+The estimator follows the usual `scikit-learn` `fit`/`predict` interface. The example below fits a linear quantile regression model at the 0.9 quantile.
+
+# Load example regression data
+X, y = fetch_california_housing(return_X_y=True)
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+)
+
+# Standardize features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Fit an upper conditional quantile model
+model = SGDQuantileRegressor(
+    quantile=0.9,
+    learning_rate=0.5,
+    max_iter=5000,
+    batch_size=256,
+    use_adagrad=True,
+    average_iterates=True,
+    random_state=42,
+)
+
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+loss = mean_pinball_loss(y_test, y_pred, alpha=0.9)
+print(f"Test pinball loss: {loss:.4f}")
+
+Prediction intervals can be constructed by fitting separate models at lower and upper quantile levels.
+
+lower = SGDQuantileRegressor(
+    quantile=0.1,
+    learning_rate=0.5,
+    max_iter=5000,
+    batch_size=256,
+    use_adagrad=True,
+    average_iterates=True,
+    random_state=42,
+)
+
+upper = SGDQuantileRegressor(
+    quantile=0.9,
+    learning_rate=0.5,
+    max_iter=5000,
+    batch_size=256,
+    use_adagrad=True,
+    average_iterates=True,
+    random_state=42,
+)
+
+lower.fit(X_train, y_train)
+upper.fit(X_train, y_train)
+
+q_lower = lower.predict(X_test)
+q_upper = upper.predict(X_test)
+
+coverage = ((y_test >= q_lower) & (y_test <= q_upper)).mean()
+mean_width = (q_upper - q_lower).mean()
+
+print(f"Coverage: {coverage:.3f}")
+print(f"Mean interval width: {mean_width:.3f}")
+
+The resulting interval `[q_lower, q_upper]` is a nominal 80% prediction interval because it is constructed from the 0.1 and 0.9 conditional quantile estimates.
 
 Create and activate a virtual environment:
 
