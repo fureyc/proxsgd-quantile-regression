@@ -268,20 +268,19 @@ Small standalone examples are provided in the `examples/` directory.
 ```text
 examples/
 ├── quick_start.py
-├── prediction_interval_demo.py
-└── regularized_quantile_demo.py
+└── prediction_interval_demo.py
 ```
 
 These scripts demonstrate common uses of `SGDQuantileRegressor`:
 
 - `quick_start.py`: fits a single conditional quantile model and reports test pinball loss.
-- `prediction_interval_demo.py`: fits lower and upper quantile models and computes empirical coverage and mean interval width.
-- `regularized_quantile_demo.py`: fits a model with optional `l1` regularization.
+- `prediction_interval_demo.py`: fits lower and upper quantile models, computes empirical coverage and mean interval width, and displays a simple prediction interval plot.
 
-For example, after installing the package, run:
+After installing the package, the examples can be run from the repository root:
 
 ```bash
 python examples/quick_start.py
+python examples/prediction_interval_demo.py
 ```
 
 ## Reproducing the experiments
