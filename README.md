@@ -28,13 +28,14 @@ The experiments evaluate:
 
 The empirical study includes synthetic experiments, standard benchmark datasets, and large-scale experiments using data derived from the Current Population Survey (CPS).
 
-```markdown
+
 ## Repository structure
 
 ```text
 .
 ├── README.md
 ├── requirements.txt
+├── requirements-repro.txt
 ├── pyproject.toml
 ├── LICENSE
 ├── CITATION.cff
@@ -51,20 +52,10 @@ The empirical study includes synthetic experiments, standard benchmark datasets,
     ├── README.md
     ├── figures/
     └── tables/
+```
 
-## Quick start: using `SGDQuantileRegressor`
+The submitted experiments were run with Python 3.12.13, NumPy 2.0.2, pandas 2.2.2, SciPy 1.16.3, scikit-learn 1.6.1, and statsmodels 0.14.6.
 
-After cloning the repository, install the package locally in editable mode:
-
-```bash
-pip install -e .
-
-The notebooks are organized as follows:
-
-- `01_SGD_Quantile_Regression_Utils.ipynb` contains the estimator implementation, helper functions, data-loading utilities, evaluation metrics, and plotting functions.
-- `02_SGD_Quantile_Results.ipynb` runs the experiments and produces the numerical results, tables, and figures reported in the manuscript.
-
-The `results/` directory is intended to store generated figures and tables. It may be empty when the repository is first cloned; running the results notebook will populate the relevant output folders.
 ## Installation
 
 Clone the repository:
@@ -112,13 +103,25 @@ pip install -r requirements-repro.txt
 pip install -e .
 ```
 
-The submitted experiments were run with Python 3.12.13, NumPy 2.0.2, pandas 2.2.2, SciPy 1.16.3, scikit-learn 1.6.1, and statsmodels 0.14.6.
+As a quick import check, run:
+
+```bash
+python -c "from proxsgd_quantile import SGDQuantileRegressor; print(SGDQuantileRegressor)"
+```
+
+A successful import confirms that the editable installation is working.
 
 ## Quick start: using `SGDQuantileRegressor`
 
 The main estimator in this repository is `SGDQuantileRegressor`, a `scikit-learn`-compatible linear quantile regression estimator trained using proximal stochastic subgradient descent.
 
-The estimator follows the usual `scikit-learn` `fit`/`predict` interface. The example below fits a linear quantile regression model at the 0.9 quantile.
+After installation, the estimator can be imported with:
+
+```python
+from proxsgd_quantile import SGDQuantileRegressor
+```
+
+The estimator follows the usual `scikit-learn` `fit`/`predict` interface. The example below fits a linear quantile regression model at the 0.9 quantile on the California Housing dataset.
 
 ```python
 from sklearn.datasets import fetch_california_housing
@@ -162,7 +165,7 @@ loss = mean_pinball_loss(y_test, y_pred, alpha=0.9)
 print(f"Test pinball loss: {loss:.4f}")
 ```
 
-Prediction intervals can be constructed by fitting separate models at lower and upper quantile levels.
+Prediction intervals can be constructed by fitting separate models at lower and upper quantile levels. The example below fits models at the 0.1 and 0.9 quantiles to form a nominal 80% prediction interval.
 
 ```python
 lower = SGDQuantileRegressor(
@@ -200,14 +203,40 @@ print(f"Mean interval width: {mean_width:.3f}")
 
 The resulting interval `[q_lower, q_upper]` is a nominal 80% prediction interval because it is constructed from the 0.1 and 0.9 conditional quantile estimates.
 
+## Estimator and package structure
+
+The reusable estimator code is separated from the experiment notebooks. The main estimator is implemented in:
+
+```text
+src/proxsgd_quantile/sgd_quantile.py
+```
+
+and can be imported with:
+
+```python
+from proxsgd_quantile import SGDQuantileRegressor
+```
+
+The notebooks are used to reproduce the numerical experiments reported in the manuscript:
+
+- `notebooks/01_SGD_Quantile_Regression_Utils.ipynb` contains helper functions, data-loading utilities, evaluation metrics, and plotting routines used by the experiments.
+- `notebooks/02_SGD_Quantile_Results.ipynb` runs the synthetic, benchmark, and CPS experiments and generates the manuscript figures and tables.
+
+Generated outputs should be written to:
+
+```text
+results/figures/
+results/tables/
+```
+
 ## Reproducing the experiments
 
-The notebooks should be run in the following order:
+The numerical experiments are organized across two notebooks and should be run in the following order:
 
 1. `notebooks/01_SGD_Quantile_Regression_Utils.ipynb`
 2. `notebooks/02_SGD_Quantile_Results.ipynb`
 
-The first notebook defines the estimator and utility functions. The second notebook runs the numerical experiments and generates the figures and tables.
+The first notebook defines helper functions, data-loading utilities, evaluation metrics, and plotting routines used by the experiments. The second notebook runs the numerical experiments and generates the figures and tables reported in the manuscript.
 
 To start Jupyter locally, run:
 
@@ -217,17 +246,15 @@ jupyter notebook
 
 Then open the notebooks in the order listed above.
 
-For Google Colab, upload or open the notebooks in the same order. If running in Colab, make sure that any required local data paths are updated before running the CPS experiments.
+For Google Colab, upload or open the notebooks in the same order. If running in Colab, make sure that the repository has been installed and that any required local data paths are updated before running the CPS experiments.
+
+The synthetic and benchmark experiments can be run directly from the notebooks. The large-scale CPS experiments require separately obtained IPUMS CPS data; see the Data notes section below for details.
 
 ## Data notes
 
 The synthetic and benchmark experiments can be run directly from the notebooks. Public benchmark datasets are either loaded through standard Python packages or downloaded from their public sources as needed.
 
-The large-scale CPS experiments require an IPUMS CPS extract. Due to data-use restrictions and file size, the CPS data are not included in this repository. To reproduce the CPS experiments, obtain the corresponding IPUMS CPS extract, clean it using the preprocessing steps described in the notebook, and place the cleaned chunks in:
-
-```text
-data/ipums_clean_chunks/
-```
+The large-scale CPS experiments require an IPUMS CPS extract. Due to data-use restrictions and file size, the raw CPS data are not included in this repository. Details for reproducing the CPS experiments are provided below.
 
 The CSV files in `results/tables/` are included so that the manuscript tables and figures can be regenerated without rerunning every large-scale experiment from scratch.
 
@@ -244,22 +271,22 @@ The benchmark experiments use datasets available through standard Python package
 - Abalone data from the UCI Machine Learning Repository,
 - Concrete Compressive Strength data from the UCI Machine Learning Repository.
 
-The notebook contains the relevant loading and preprocessing routines.
+The notebooks contain the relevant loading and preprocessing routines.
 
 ### CPS data
 
 The CPS experiments use data derived from the IPUMS Current Population Survey database. Raw CPS data are **not included** in this repository because users must obtain them directly from IPUMS CPS subject to the relevant data-use terms.
 
-To reproduce the CPS experiments, download the appropriate CPS extract from IPUMS and place the cleaned data files in the expected local data directory. For example:
-
-```text
-data/ipums_clean_chunks/
-```
-
-The results notebook expects cleaned CPS chunks with filenames of the form:
+To reproduce the CPS experiments, download the appropriate CPS extract from IPUMS and apply the preprocessing steps described in the notebooks. The results notebook expects cleaned CPS chunks with filenames of the form:
 
 ```text
 clean_part_*.csv
+```
+
+placed in:
+
+```text
+data/ipums_clean_chunks/
 ```
 
 If you use a different local directory, update the CPS path variables in the results notebook before running the CPS experiments.
@@ -292,7 +319,7 @@ results/tables/
 
 ## Method summary
 
-The proposed estimator minimizes the empirical quantile regression objective using proximal stochastic subgradient descent. For a quantile level `tau`, the method uses mini-batches to compute stochastic subgradients of the pinball loss and applies a coordinate-wise proximal update for optional `l1` regularization.
+The proposed estimator minimizes the empirical quantile regression objective using proximal stochastic subgradient descent. For a specified quantile level, the method uses mini-batches to compute stochastic subgradients of the pinball loss and applies a coordinate-wise proximal update for optional `l1` regularization.
 
 The implementation supports:
 
