@@ -203,6 +203,7 @@ print(f"Mean interval width: {mean_width:.3f}")
 
 The resulting interval `[q_lower, q_upper]` is a nominal 80% prediction interval because it is constructed from the 0.1 and 0.9 conditional quantile estimates.
 
+
 ## Estimator and package structure
 
 The reusable estimator code is separated from the experiment notebooks. The main estimator is implemented in:
@@ -227,6 +228,29 @@ Generated outputs should be written to:
 ```text
 results/figures/
 results/tables/
+```
+
+## Examples
+
+Small standalone examples are provided in the `examples/` directory.
+
+```text
+examples/
+├── quick_start.py
+├── prediction_interval_demo.py
+└── regularized_quantile_demo.py
+```
+
+These scripts demonstrate common uses of `SGDQuantileRegressor`:
+
+- `quick_start.py`: fits a single conditional quantile model and reports test pinball loss.
+- `prediction_interval_demo.py`: fits lower and upper quantile models and computes empirical coverage and mean interval width.
+- `regularized_quantile_demo.py`: fits a model with optional `l1` regularization.
+
+For example, after installing the package, run:
+
+```bash
+python examples/quick_start.py
 ```
 
 ## Reproducing the experiments
