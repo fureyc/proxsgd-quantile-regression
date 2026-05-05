@@ -28,8 +28,6 @@ The experiments evaluate:
 
 The empirical study includes synthetic experiments, standard benchmark datasets, and large-scale experiments using data derived from the Current Population Survey (CPS).
 
-And here is an updated repository structure block reflecting the changes:
-
 ```markdown
 ## Repository structure
 
