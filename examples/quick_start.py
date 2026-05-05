@@ -22,7 +22,7 @@ def main():
         X,
         y,
         test_size=0.2,
-        random_state=42,
+        random_state=33,
     )
 
     # Standardize features before fitting a linear model
