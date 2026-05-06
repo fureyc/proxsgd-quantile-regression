@@ -467,20 +467,6 @@ results/figures/
 results/tables/
 ```
 
-## Method summary
-
-The proposed estimator minimizes the empirical quantile regression objective using proximal stochastic subgradient descent. For a specified quantile level, the method uses mini-batches to compute stochastic subgradients of the pinball loss and applies a coordinate-wise proximal update for optional `l1` regularization.
-
-The implementation supports:
-
-- mini-batch stochastic subgradient updates,
-- AdaGrad step sizes,
-- diminishing step-size schedules,
-- Polyak--Ruppert iterate averaging,
-- optional `l1` regularization,
-- optional validation-based early stopping,
-- `scikit-learn`-style `fit` and `predict` methods.
-
 ## Citation
 
 If you use this code, please cite the associated manuscript:
