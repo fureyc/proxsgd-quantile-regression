@@ -28,6 +28,118 @@ The experiments evaluate:
 
 The empirical study includes synthetic experiments, standard benchmark datasets, and large-scale experiments using data derived from the Current Population Survey (CPS).
 
+## Method summary
+
+For a quantile level \(\tau \in (0,1)\), linear quantile regression estimates a conditional quantile function using a model of the form
+
+\[
+f(x) = x^\top \theta + b,
+\]
+
+where \(x \in \mathbb{R}^d\), \(\theta \in \mathbb{R}^d\), and \(b \in \mathbb{R}\). Given observations \(\{(x_i,y_i)\}_{i=1}^n\) with design matrix \(X \in \mathbb{R}^{n \times d}\), the residual for observation \(i\) is
+
+\[
+r_i = y_i - x_i^\top \theta - b.
+\]
+
+The pinball loss is
+
+\[
+\rho_\tau(r)
+=
+r\left(\tau - \mathbf{1}\{r < 0\}\right),
+\]
+
+which assigns asymmetric penalties to positive and negative residuals. The main optimization problem considered in this repository is the \(\ell_1\)-regularized quantile regression objective
+
+\[
+\min_{\theta,b}
+\sum_{i=1}^n
+\rho_\tau\left(y_i - x_i^\top \theta - b\right)
++
+\lambda_1 \|\theta\|_1,
+\]
+
+where the intercept \(b\) is left unpenalized. The implementation also allows an optional \(\ell_2\) stabilization term for numerical robustness.
+
+### Classical solvers
+
+The classical linear programming formulation introduces nonnegative slack variables \(\xi_i^+\) and \(\xi_i^-\) for the positive and negative parts of each residual, together with a decomposition \(\theta = \theta^+ - \theta^-\) for \(\ell_1\) regularization. This yields a linear program in variables
+
+\[
+z \in \mathbb{R}^{2d + 2n + 1},
+\]
+
+with constraints whose number grows with the sample size \(n\). In this repository, the LP baseline is implemented using `scikit-learn`'s `QuantileRegressor` with the HiGHS backend.
+
+As a second classical baseline, we use the `statsmodels` implementation of quantile regression, `QuantReg`, which is based on iteratively reweighted least squares (IRLS). IRLS solves a sequence of weighted least squares problems of the form
+
+\[
+\min_{\theta,b}
+\left\|
+W^{1/2}(y - X\theta - b\mathbf{1}_n)
+\right\|_2^2,
+\]
+
+where the diagonal weight matrix \(W\) is updated using residuals from the previous iterate. This approach often performs well in moderate-scale settings, but each iteration requires dense linear algebra involving the full design matrix.
+
+### Proximal stochastic optimization
+
+The proposed estimator, `SGDQuantileRegressor`, avoids repeated global linear system solves by using mini-batch stochastic subgradient updates. At iteration \(t\), a mini-batch \(B_t\) of size \(m\) is sampled. For each \(i \in B_t\), the residual subgradient is
+
+\[
+s_i = \tau - \mathbf{1}\{r_i < 0\}.
+\]
+
+Let \(s_{B_t}\) denote the vector of mini-batch residual subgradients. The corresponding stochastic subgradients of the data-fit term are
+
+\[
+\nabla_\theta f_{B_t}
+=
+-\frac{1}{m} X_{B_t}^\top s_{B_t},
+\qquad
+\nabla_b f_{B_t}
+=
+-\frac{1}{m}\mathbf{1}_m^\top s_{B_t}.
+\]
+
+The coefficient vector is first updated by a stochastic subgradient step,
+
+\[
+v_t
+=
+\theta_t
+-
+\eta_t \nabla_\theta f_{B_t}(\theta_t,b_t),
+\]
+
+and the intercept is updated by
+
+\[
+b_{t+1}
+=
+b_t
+-
+\eta_t \nabla_b f_{B_t}(\theta_t,b_t).
+\]
+
+The \(\ell_1\) penalty is handled using the proximal operator, which reduces to coordinate-wise soft-thresholding:
+
+\[
+\theta_{t+1}
+=
+S_{\eta_t \lambda_1}(v_t),
+\]
+
+where
+
+\[
+S_\kappa(v_j)
+=
+\operatorname{sign}(v_j)\max(|v_j|-\kappa,0).
+\]
+
+Thus, each proxSGD iteration replaces the full-dataset linear algebra required by LP and IRLS with mini-batch matrix-vector multiplications and coordinate-wise proximal updates. The implementation supports square-root learning-rate decay, AdaGrad step sizes, Polyak--Ruppert iterate averaging, optional early stopping, and the standard `scikit-learn` `fit`/`predict` interface.
 
 ## Repository structure
 
@@ -154,7 +266,7 @@ X_test = scaler.transform(X_test)
 model = SGDQuantileRegressor(
     quantile=0.9,
     base_lr=0.5,
-    max_iter=5000,
+    max_iter=1000,
     batch_size=256,
     use_adagrad=True,
     use_averaging=True,
@@ -174,7 +286,7 @@ Prediction intervals can be constructed by fitting separate models at lower and 
 lower = SGDQuantileRegressor(
     quantile=0.1,
     base_lr=0.5,
-    max_iter=5000,
+    max_iter=1000,
     batch_size=256,
     use_adagrad=True,
     use_averaging=True,
@@ -184,7 +296,7 @@ lower = SGDQuantileRegressor(
 upper = SGDQuantileRegressor(
     quantile=0.9,
     base_lr=0.5,
-    max_iter=5000,
+    max_iter=1000,
     batch_size=256,
     use_adagrad=True,
     use_averaging=True,
