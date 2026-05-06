@@ -251,7 +251,7 @@ model = SGDQuantileRegressor(
     batch_size=256,
     use_adagrad=True,
     use_averaging=True,
-    random_state=42,
+    random_state=33,
 )
 
 model.fit(X_train, y_train)
@@ -271,7 +271,7 @@ lower = SGDQuantileRegressor(
     batch_size=256,
     use_adagrad=True,
     use_averaging=True,
-    random_state=42,
+    random_state=33,
 )
 
 upper = SGDQuantileRegressor(
@@ -281,7 +281,7 @@ upper = SGDQuantileRegressor(
     batch_size=256,
     use_adagrad=True,
     use_averaging=True,
-    random_state=42,
+    random_state=33,
 )
 
 lower.fit(X_train, y_train)
